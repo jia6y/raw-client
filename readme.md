@@ -1,6 +1,6 @@
 ## RAW Client
 raw client is a bash wrapper of udp2raw client.
-comiled upon nolibnet version.
+compiled upon nolibnet version.
 
 
 ### Installation
