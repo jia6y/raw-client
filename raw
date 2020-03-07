@@ -1,0 +1,87 @@
+#!/bin/bash
+
+raw_home="udp2raw-multiplatform-mp"
+
+function upd2raw_pid {
+	echo `ps -ef|grep "udp2raw_mp_nolibnet"|grep -v 'grep'|awk '{print $2}'`
+}
+
+function deamon_pid {
+	echo `ps -ef|grep "udp2raw_mp_nolibnet"|grep -v 'grep'|awk '{print $3}'`
+}
+
+function start {
+	[[ -f "${raw_home}/udp2raw_mp_nolibnet" ]]&&{
+		[[ -f ".straw.tmp" ]]&&{
+			echo "[WARN] RAW Client is already running, pid=`deamon_pid`"
+		}||{
+			. ./straw.sh &
+			touch .straw.tmp
+			echo "[Message] Started."
+			echo "[Message] Check log please use: ./raw -l"
+		}
+	}||{
+		echo "[WARN] RAW Cleint is not instlled."
+		echo "[WARN] Please run ./install.sh for installation."
+	}
+}
+
+function stop {
+	[[ -f ".straw.tmp" ]]&&{
+		echo "[Message] Deamon pid=`deamon_pid`"
+		echo "[Message] Stopping..."
+
+		kill -9 `pgrep -f "udp2raw_mp_nolibnet"` 2>/dev/null
+
+		rm ".straw.tmp" 2>/dev/null
+
+		for raw_id in `pgrep -f "./raw"`
+		do 
+			kill -9 ${raw_id} 2>/dev/null
+			[[ $? = 0 ]]&&{
+				echo "[Message] pid ${raw_id} stopped."
+			}||{
+				"[ERROR] Failed to stop pid ${raw_id}, please manually stop it."
+				touch ".straw.tmp"
+			}
+		done
+	}||{
+		echo "[Message] RAW Cleint is not running."
+	}
+}
+
+function check {
+	tail -f raw_client.log
+}
+
+
+case $1 in
+	start|-s|--start)
+		start
+		;;
+	stop|-p|--stop)
+		stop
+		;;
+	restart|-r|--restart)
+		stop
+		start
+		;;
+	status|-t|--status)
+		[[ -f ".straw.tmp" ]]&&{
+			echo "[WARN] RAW Client is already running, pid=`deamon_pid`"
+		}||{
+			echo "[Message] RAW Cleint is not running."
+		}
+		;;		
+	check|-l|--log)
+		check
+		;;
+		
+	*)
+		echo "[ERROR] Unsupport option."
+		echo "[Message] Usage: start|-s|--start, stop|-p|--stop, restart|-r|--restart, check|-l|--log, status|-t|--status"
+		echo ""
+		exit 1
+esac
+		
+	
