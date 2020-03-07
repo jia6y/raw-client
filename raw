@@ -35,7 +35,7 @@ function stop {
 
 		rm ".straw.tmp" 2>/dev/null
 
-		for raw_id in `pgrep -f "./raw"`
+		for raw_id in `pgrep -f "/raw -"`
 		do 
 			kill -9 ${raw_id} 2>/dev/null
 			[[ $? = 0 ]]&&{
